@@ -1,0 +1,16 @@
+# Local tooling and editor files
+node_modules/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+
+# Vehicle packs are local input, not website assets
+*.zip
+*.jar
+*.mqo
+*.mqoz
+*.obj
+*.mtl

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Train Projector — RTM車両の投影</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="zip.js" defer></script>
+  <script src="config.js" defer></script>
+  <script src="model.js" defer></script>
+  <script src="obj.js" defer></script>
+  <script src="renderer.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="header"><a class="brand" href="index.html">Train Projector</a></header>
+  <main>
+    <section class="intro"><h1>車両モデルの投影</h1><p>RTMパックのZIPから車両を選び、各方向の透過PNGを保存できます。処理はブラウザ内で完結します。</p></section>
+    <section id="drop-zone" class="drop-zone" aria-label="パックの読み込み">
+      <div><h2>RTMパックを読み込む</h2><p>ZIPをここにドロップ、またはファイルを選択。前提パック・共通パックもまとめて読み込めます。JARのリソースも読み込めます。</p></div>
+      <label class="button primary" for="zip-files">ファイルを選ぶ</label><input id="zip-files" type="file" accept=".zip,.jar,application/zip,application/java-archive" multiple>
+    </section>
+    <div class="load-bar"><p id="load-status" role="status" aria-live="polite">ZIPはまだ読み込まれていません。</p><button id="reset" class="text-button" disabled>すべてクリア</button></div>
+    <div class="workspace">
+      <aside class="vehicles"><div class="panel-title"><h2>車両</h2><span id="vehicle-count" class="count">0</span></div><label class="sr-only" for="search">車両を検索</label><input id="search" type="search" placeholder="車両名・JSON名で検索" disabled><div id="vehicle-list" class="vehicle-list"><p class="empty-list">読み込んだ車両が<br>ここに並びます。</p></div></aside>
+      <section class="projection" aria-labelledby="projection-title">
+        <div class="panel-title"><div><h2 id="projection-title">プレビュー</h2><p id="vehicle-detail">車両を選択してください</p></div><span id="view-label" class="view-label">+X / 側面</span></div>
+        <div class="view-controls" role="group" aria-label="投影方向"><button data-view="+X" class="active" aria-pressed="true">+X 側面</button><button data-view="-X" aria-pressed="false">−X 側面</button><button data-view="+Y" aria-pressed="false">+Y 上面</button><button data-view="-Y" aria-pressed="false">−Y 下面</button><button data-view="+Z" aria-pressed="false">+Z 正面</button><button data-view="-Z" aria-pressed="false">−Z 背面</button></div>
+        <div id="preview" class="preview"><canvas id="canvas" aria-label="車両の投影画像" hidden></canvas><div id="empty-preview"><p>ZIPを読み込むと、ここに投影画像を表示します。</p></div></div>
+        <div id="render-status" class="render-status" role="status" aria-live="polite">モデル・材質・テクスチャをJSONから読み込みます。</div>
+        <div class="export-controls"><label>画像の長辺<select id="width"><option value="1024">1024 px</option><option value="2048" selected>2048 px</option><option value="4096">4096 px</option></select></label><button id="download" class="button primary" disabled>透過PNGを保存 ↓</button></div>
+        <p class="note">MQO・OBJ・MQOZの静止モデルに対応しています。車両JSによる部品制御とJava製モデルの描画は未対応です。部品一覧から表示を調整できます。</p>
+        <details id="materials-panel" open>
+          <summary>マテリアルの描画設定 <span id="material-count"></span></summary>
+          <fieldset id="material-fields" disabled>
+            <div class="part-tools"><label class="sr-only" for="material-search">マテリアルを検索</label><input id="material-search" type="search" placeholder="材質名・テクスチャ名で検索"><button id="materials-reset" class="text-button" type="button">読み込み時に戻す</button></div>
+            <div class="material-scroll"><table class="materials-table"><thead><tr><th scope="col">表示</th><th scope="col">材質</th><th scope="col">AlphaBlend</th><th scope="col">Light</th><th scope="col">両面</th><th scope="col">不透明度</th></tr></thead><tbody id="materials"></tbody></table></div>
+          </fieldset>
+          <p class="editor-help">変更はプレビューと出力PNGに反映します。AlphaBlendは半透明描画、Lightは元テクスチャを陰影なしで表示する簡易発光です。</p>
+        </details>
+        <details id="parts-panel" open>
+          <summary>パーツの表示／非表示 <span id="part-count"></span></summary>
+          <fieldset id="part-fields" disabled>
+            <div class="part-tools"><label class="sr-only" for="part-search">パーツを検索</label><input id="part-search" type="search" placeholder="パーツ名で検索"><button id="parts-show" class="text-button" type="button">検索結果を表示</button><button id="parts-hide" class="text-button" type="button">検索結果を非表示</button><button id="parts-invert" class="text-button" type="button">検索結果を反転</button><button id="parts-reset" class="text-button" type="button">読み込み時に戻す</button></div>
+            <div id="parts" class="parts"></div>
+          </fieldset>
+        </details>
+        <details id="diagnostics"><summary>読み込み情報・不足ファイル</summary><ul id="messages"><li>不足したモデルやテクスチャはここに表示します。</li></ul></details>
+      </section>
+    </div>
+    <footer>Train Projector · RTM車両パックの投影 · ファイルはブラウザ内で処理します</footer>
+  </main>
+</body>
+</html>
